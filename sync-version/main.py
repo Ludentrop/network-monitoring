@@ -2,21 +2,25 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from routes.users import user_router
-from database.db import initialize_database
+# from routes.terminals import terminal_router
+# from routes.equipment import equipment_router
+from database.db import conn
 
 
 app = FastAPI()
-app.include_router(user_router)
+app.include_router(user_router, prefix="/user")
+# app.include_router(terminal_router, prefix="/terminal")
+# app.include_router(equipment_router, prefix="/equipment")
 
 
 @app.on_event("startup")
-async def init_db():
-    await initialize_database()
+def on_startup():
+    conn()
 
 
 @app.get("/")
 async def home():
-    return RedirectResponse(url="/event/")
+    return RedirectResponse(url="/user")
 
 
 if __name__ == '__main__':

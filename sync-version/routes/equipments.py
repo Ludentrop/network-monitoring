@@ -1,0 +1,1 @@
+from models.equipment import Equipment
