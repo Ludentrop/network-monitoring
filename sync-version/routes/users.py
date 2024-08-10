@@ -11,7 +11,6 @@ user_router = APIRouter(tags=['User'])
 
 @user_router.post('/signup')
 async def sign_up(user: User, session=Depends(get_session)) -> dict:
-    # print(dir(session))
     statement = select(User).where(User.username == user.username)
     user_exist = session.execute(statement).fetchall()
 
@@ -32,28 +31,27 @@ async def sign_up(user: User, session=Depends(get_session)) -> dict:
 
 @user_router.post('/signin')
 async def sign_in(user: UserSignIn, session=Depends(get_session)) -> dict:  # : OAuth2PasswordRequestForm = Depends()
-    user_exist = await User.find_one(User.username == user.username)
-    if not user_exist:
+    statement = select(User).where(User.username == user.username)
+    user_exist = session.execute(statement).scalar_one_or_none()
+    if user_exist is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User {user.username} does not exist."
         )
-    if user_exist.password == user.password:
+    elif user_exist.password == user.password:
         return {
             "message": "User signed in successfully."
         }
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid details passed."
-    )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid details passed."
+        )
 
 
 @user_router.get("/get_all", response_model=List[User])
 async def get_all_users(session=Depends(get_session)) -> List[User]:
-    statement = select(User)
-    users = session.exec(statement).all()
-    return users
+    return session.query(User).all()
 
 
 @user_router.get("/{id}", response_model=User)
@@ -84,8 +82,15 @@ async def update_user(user_id: int, new_data: UserUpdate, session=Depends(get_se
                         )
 
 
+@user_router.delete("/delete/")
+async def delete_all_users(session=Depends(get_session)) -> dict:
+    session.query(User).delete()
+    session.commit()
+    return {"message": "All users deleted successfully."}
+
+
 @user_router.delete("/delete/{id}")
-async def delete_user(user_id: int, session=Depends(get_session)) -> dict:
+async def delete_user_by_id(user_id: int, session=Depends(get_session)) -> dict:
     user = session.get(User, user_id)
     if user:
         session.delete(user)
