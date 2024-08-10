@@ -11,3 +11,7 @@ class Equipment(SQLModel, table=True, tablename="equipments"):
                 "ip_address": "192.168.0.1"
             }
         }
+
+
+class EquipmentResponse(SQLModel):
+    ip_address: str

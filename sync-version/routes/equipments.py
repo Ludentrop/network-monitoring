@@ -3,7 +3,7 @@ from typing import List
 from sqlmodel import select
 
 from database.db import get_session
-from models.equipments import Equipment
+from models.equipments import Equipment, EquipmentResponse
 
 
 equipment_router = APIRouter(tags=['Equipment'])
@@ -34,7 +34,7 @@ async def get_all_equipments(session=Depends(get_session)) -> List[Equipment]:
     return session.query(Equipment).all()
 
 
-@equipment_router.get("/{id}", response_model=Equipment)
+@equipment_router.get("/{id}", response_model=EquipmentResponse)
 async def get_equipment_by_id(equipment_id: int, session=Depends(get_session)) -> Equipment:
     equipment = session.get(Equipment, equipment_id)
     if equipment:

@@ -3,7 +3,7 @@ from typing import List
 from sqlmodel import select
 
 from database.db import get_session
-from models.users import User, UserSignIn, UserUpdate
+from models.users import User, UserSignIn, UserUpdate, UserResponse
 
 
 user_router = APIRouter(tags=['User'])
@@ -54,7 +54,7 @@ async def get_all_users(session=Depends(get_session)) -> List[User]:
     return session.query(User).all()
 
 
-@user_router.get("/{id}", response_model=User)
+@user_router.get("/{id}", response_model=UserResponse)
 async def get_user_by_id(user_id: int, session=Depends(get_session)) -> User:
     user = session.get(User, user_id)
     if user:

@@ -3,7 +3,7 @@ from typing import List
 from sqlmodel import select
 
 from database.db import get_session
-from models.terminals import Terminal
+from models.terminals import Terminal, TerminalResponse
 
 
 terminal_router = APIRouter(tags=['Terminal'])
@@ -34,7 +34,7 @@ async def get_all_terminals(session=Depends(get_session)) -> List[Terminal]:
     return session.query(Terminal).all()
 
 
-@terminal_router.get("/{id}", response_model=Terminal)
+@terminal_router.get("/{id}", response_model=TerminalResponse)
 async def get_terminal_by_id(terminal_id: int, session=Depends(get_session)) -> Terminal:
     terminal = session.get(Terminal, terminal_id)
     if terminal:

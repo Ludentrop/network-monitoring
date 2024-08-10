@@ -44,3 +44,9 @@ class UserUpdate(SQLModel):
                 "password": "admin12345",
             }
         }
+
+
+class UserResponse(SQLModel):
+    username: str
+    fullname: str
+

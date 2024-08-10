@@ -13,3 +13,8 @@ class Terminal(SQLModel, table=True, tablename="terminals"):
                 "model": "A"
             }
         }
+
+
+class TerminalResponse(SQLModel):
+    mac: str
+    model: str
