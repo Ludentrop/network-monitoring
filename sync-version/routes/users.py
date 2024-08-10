@@ -1,12 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordRequestForm
 from typing import List
 from sqlmodel import select
+import uuid
 
 from database.db import get_session
-from models.users import User, UserSignIn, UserUpdate, UserResponse
-
+from models.users import User, UserSignIn, UserUpdate, UserResponse, TokenResponse
+from auth.hash_password import HashPassword
+from auth.jwt_handler import create_access_token
 
 user_router = APIRouter(tags=['User'])
+
+hash_password = HashPassword()
 
 
 @user_router.post('/signup')
@@ -19,7 +24,8 @@ async def sign_up(user: User, session=Depends(get_session)) -> dict:
             status_code=status.HTTP_409_CONFLICT,
             detail=f"User {user.username} already exists."
         )
-
+    hashed_password = hash_password.create_hash(user.password)
+    user.password = hashed_password
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -30,7 +36,8 @@ async def sign_up(user: User, session=Depends(get_session)) -> dict:
 
 
 @user_router.post('/signin')
-async def sign_in(user: UserSignIn, session=Depends(get_session)) -> dict:  # : OAuth2PasswordRequestForm = Depends()
+async def sign_in(user: OAuth2PasswordRequestForm = Depends(),
+                  session=Depends(get_session)) -> dict:  # : OAuth2PasswordRequestForm = Depends()
     statement = select(User).where(User.username == user.username)
     user_exist = session.execute(statement).scalar_one_or_none()
     if user_exist is None:
@@ -38,9 +45,11 @@ async def sign_in(user: UserSignIn, session=Depends(get_session)) -> dict:  # : 
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User {user.username} does not exist."
         )
-    elif user_exist.password == user.password:
+    elif hash_password.verify_hash(user.password, user_exist.password):
+        access_token = create_access_token(user_exist.username)
         return {
-            "message": "User signed in successfully."
+            "access_token": access_token,
+            "token_type": "Bearer"
         }
     else:
         raise HTTPException(

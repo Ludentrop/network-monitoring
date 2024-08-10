@@ -1,9 +1,20 @@
 from sqlmodel import SQLModel, Session, create_engine
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
 
-from .cfg import PATH
+# from .cfg import PATH
 
 
-engine = create_engine(PATH, echo=False)
+class Settings(BaseSettings):
+    DB_URL: str
+
+    model_config = SettingsConfigDict(env_file=".env", extra='ignore')
+
+
+settings = Settings()
+
+
+engine = create_engine(settings.DB_URL, echo=False)
 
 
 def conn():

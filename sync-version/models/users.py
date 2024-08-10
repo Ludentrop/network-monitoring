@@ -50,3 +50,7 @@ class UserResponse(SQLModel):
     username: str
     fullname: str
 
+
+class TokenResponse(SQLModel):
+    access_token: str
+    token_type: str

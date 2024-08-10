@@ -20,7 +20,7 @@ def on_startup():
 
 @app.get("/")
 async def home():
-    return RedirectResponse(url="/user")
+    return RedirectResponse(url="/docs#")
 
 
 if __name__ == '__main__':
