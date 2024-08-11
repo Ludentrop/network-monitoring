@@ -1,2 +1,2 @@
 .env
-sync-version/netmon/
+apps/network-monitoring/netmon
